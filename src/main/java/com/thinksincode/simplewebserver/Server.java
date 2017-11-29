@@ -10,6 +10,8 @@ public class Server {
 
   private int threadCount;
 
+  private RequestLogger logger = new RequestLogger();
+
   public Server(int port, int threadCount) {
     this.port = port;
     this.threadCount = threadCount;
@@ -22,7 +24,7 @@ public class Server {
     ExecutorService clientExecutor = Executors.newFixedThreadPool(this.threadCount);
 
     while (true) {
-      clientExecutor.submit(new RequestHandler(serverSocket.accept()));
+      clientExecutor.submit(new RequestHandler(serverSocket.accept(), logger));
     }
   }
 }

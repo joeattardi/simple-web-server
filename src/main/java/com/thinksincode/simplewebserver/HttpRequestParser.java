@@ -7,6 +7,7 @@ public class HttpRequestParser {
     String[] lines = requestData.trim().split("\r\n");
     String[] requestLineItems = lines[0].split(" ");
 
+    request.setRequestLine(lines[0]);
     if (requestLineItems.length != 3) {
       throw new BadRequestException();
     }

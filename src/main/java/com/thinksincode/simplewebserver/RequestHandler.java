@@ -14,8 +14,11 @@ public class RequestHandler implements Runnable {
 
   private BufferedReader input;
 
-  public RequestHandler(Socket socket) {
+  private RequestLogger logger;
+
+  public RequestHandler(Socket socket, RequestLogger logger) {
     this.socket = socket;
+    this.logger = logger;
   }
 
   @Override
@@ -47,8 +50,8 @@ public class RequestHandler implements Runnable {
       requestData = readRequest(input);
     }
 
-    System.out.println("Got request:");
-    System.out.println(requestData);
+//    System.out.println("Got request:");
+//    System.out.println(requestData);
 
     HttpRequest request = null;
     HttpResponse response;
@@ -62,10 +65,14 @@ public class RequestHandler implements Runnable {
         response = handleRequest(request);
       }
     } catch (BadRequestException bre) {
+      request = new HttpRequest();
+      request.setRequestLine(requestData.split("\r\n")[0]);
       response = new HttpResponse();
       response.setResponseCode(HttpResponseCode.BAD_REQUEST);
       response.setBody("");
     }
+
+    logger.logRequest(request, response, socket);
 
     writeResponse(response);
     return keepConnectionAlive(request);

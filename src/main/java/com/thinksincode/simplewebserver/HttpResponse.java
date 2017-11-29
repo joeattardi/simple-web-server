@@ -18,6 +18,7 @@ public class HttpResponse {
 
   public HttpResponse() {
     setHeader("Date", ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME));
+    setHeader("Content-Length", Integer.toString(body.length));
   }
 
   public void setResponseCode(HttpResponseCode responseCode) {
@@ -30,6 +31,7 @@ public class HttpResponse {
 
   public void setBody(String body) {
     this.body = body.getBytes();
+    setHeader("Content-Length", Integer.toString(this.body.length));
   }
 
   public byte[] getBody() {

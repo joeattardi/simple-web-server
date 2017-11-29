@@ -9,6 +9,8 @@ public class HttpRequest {
 
   private HttpMethod method;
 
+  private String requestLine;
+
   private String path;
 
   private HttpProtocol protocol;
@@ -47,5 +49,13 @@ public class HttpRequest {
 
   public Set<Map.Entry<String, String>> getHeaders() {
     return headers.entrySet();
+  }
+
+  public void setRequestLine(String requestLine) {
+    this.requestLine = requestLine;
+  }
+
+  public String getRequestLine() {
+    return requestLine;
   }
 }
