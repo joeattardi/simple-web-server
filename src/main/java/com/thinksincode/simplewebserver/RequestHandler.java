@@ -50,10 +50,7 @@ public class RequestHandler implements Runnable {
       requestData = readRequest(input);
     }
 
-//    System.out.println("Got request:");
-//    System.out.println(requestData);
-
-    HttpRequest request = null;
+    HttpRequest request;
     HttpResponse response;
 
     try {
