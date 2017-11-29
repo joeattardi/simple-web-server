@@ -1,0 +1,37 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+version = 0.1
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testCompile "org.junit.jupiter:junit-jupiter-api:5.0.2"
+    testCompileOnly 'org.apiguardian:apiguardian-api:1.0.0'
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.0.2"
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "com.thinksincode.simplewebserver.SimpleWebServer")
+    }
+}
+
+junitPlatform {
+    platformVersion '1.0.2'
+
+}
+
+mainClassName = 'com.thinksincode.simplewebserver.SimpleWebServer'
