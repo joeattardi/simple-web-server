@@ -3,8 +3,12 @@ package com.thinksincode.simplewebserver;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class RequestHandler implements Runnable {
@@ -128,12 +132,30 @@ public class RequestHandler implements Runnable {
   private HttpResponse handleRequest(HttpRequest request) {
     HttpResponse response = new HttpResponse();
 
+    Path path = Paths.get("www", request.getPath());
+    if (!Files.exists(path)) {
+      response.setResponseCode(HttpResponseCode.NOT_FOUND);
+      try (InputStream input404 = RequestHandler.class.getClassLoader().getResourceAsStream("404.html")) {
+        byte[] body = new byte[input404.available()];
+        input404.read(body);
+        response.setBody(body);
+      } catch (IOException ioe) {
+        response.setResponseCode(HttpResponseCode.INTERNAL_SERVER_ERROR);
+      }
+      return response;
+    }
+
+    try {
+      if (request.getMethod() == HttpMethod.GET) {
+        response.setBody(Files.readAllBytes(path));
+      }
+    } catch (IOException ioe) {
+      response.setResponseCode(HttpResponseCode.INTERNAL_SERVER_ERROR);
+      return response;
+    }
+
     response.setResponseCode(HttpResponseCode.OK);
     response.setHeader("Content-Type", "text/html");
-
-    if (request.getMethod() == HttpMethod.GET) {
-      response.setBody("<h1>Hello World!</h1>\r\n");
-    }
 
     return response;
   }

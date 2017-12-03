@@ -30,7 +30,11 @@ public class HttpResponse {
   }
 
   public void setBody(String body) {
-    this.body = body.getBytes();
+    this.setBody(body.getBytes());
+  }
+
+  public void setBody(byte[] body) {
+    this.body = body;
     setHeader("Content-Length", Integer.toString(this.body.length));
   }
 
