@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 
 public class RequestHandler implements Runnable {
@@ -142,6 +143,7 @@ public class RequestHandler implements Runnable {
       } catch (IOException ioe) {
         response.setResponseCode(HttpResponseCode.INTERNAL_SERVER_ERROR);
       }
+      response.setHeader("Content-Type", "text/html");
       return response;
     }
 
@@ -154,8 +156,11 @@ public class RequestHandler implements Runnable {
       return response;
     }
 
+    String[] pathParts = request.getPath().split("\\.");
+    String extension = pathParts[pathParts.length - 1];
+
     response.setResponseCode(HttpResponseCode.OK);
-    response.setHeader("Content-Type", "text/html");
+    response.setHeader("Content-Type", ContentType.getContentType(extension));
 
     return response;
   }
