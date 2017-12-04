@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Map;
 
 public class RequestHandler implements Runnable {
@@ -21,9 +20,12 @@ public class RequestHandler implements Runnable {
 
   private RequestLogger logger;
 
-  public RequestHandler(Socket socket, RequestLogger logger) {
+  private ConfigManager config;
+
+  public RequestHandler(Socket socket, RequestLogger logger, ConfigManager config) {
     this.socket = socket;
     this.logger = logger;
+    this.config = config;
   }
 
   @Override
@@ -133,17 +135,14 @@ public class RequestHandler implements Runnable {
   private HttpResponse handleRequest(HttpRequest request) {
     HttpResponse response = new HttpResponse();
 
-    Path path = Paths.get("www", request.getPath());
+    String requestPath = request.getPath();
+    if (requestPath.endsWith("/")) {
+      requestPath += "index.html";
+    }
+
+    Path path = Paths.get(config.get(ConfigManager.CONFIG_KEY_WWW_ROOT), requestPath);
     if (!Files.exists(path)) {
-      response.setResponseCode(HttpResponseCode.NOT_FOUND);
-      try (InputStream input404 = RequestHandler.class.getClassLoader().getResourceAsStream("404.html")) {
-        byte[] body = new byte[input404.available()];
-        input404.read(body);
-        response.setBody(body);
-      } catch (IOException ioe) {
-        response.setResponseCode(HttpResponseCode.INTERNAL_SERVER_ERROR);
-      }
-      response.setHeader("Content-Type", "text/html");
+      sendNotFound(response);
       return response;
     }
 
@@ -151,17 +150,45 @@ public class RequestHandler implements Runnable {
       if (request.getMethod() == HttpMethod.GET) {
         response.setBody(Files.readAllBytes(path));
       }
-    } catch (IOException ioe) {
-      response.setResponseCode(HttpResponseCode.INTERNAL_SERVER_ERROR);
+    } catch (Exception e) {
+      sendInternalServerError(response);
       return response;
     }
 
-    String[] pathParts = request.getPath().split("\\.");
-    String extension = pathParts[pathParts.length - 1];
-
     response.setResponseCode(HttpResponseCode.OK);
-    response.setHeader("Content-Type", ContentType.getContentType(extension));
+    response.setHeader("Content-Type", getContentType(requestPath));
 
     return response;
+  }
+
+  private void sendInternalServerError(HttpResponse response) {
+    response.setResponseCode(HttpResponseCode.INTERNAL_SERVER_ERROR);
+    try (InputStream input500 = RequestHandler.class.getClassLoader().getResourceAsStream("500.html")) {
+      byte[] body = new byte[input500.available()];
+      input500.read(body);
+      response.setBody(body);
+      response.setHeader("Content-Type", "text/html");
+    } catch (IOException ioe) {
+
+    }
+  }
+
+  private void sendNotFound(HttpResponse response) {
+    response.setResponseCode(HttpResponseCode.NOT_FOUND);
+    try (InputStream input404 = RequestHandler.class.getClassLoader().getResourceAsStream("404.html")) {
+      byte[] body = new byte[input404.available()];
+      input404.read(body);
+      response.setBody(body);
+      response.setHeader("Content-Type", "text/html");
+    } catch (Exception e) {
+      sendInternalServerError(response);
+    }
+  }
+
+  private String getContentType(String requestPath) {
+    String[] pathParts = requestPath.split("\\.");
+    String extension = pathParts[pathParts.length - 1];
+
+    return ContentType.getContentType(extension);
   }
 }

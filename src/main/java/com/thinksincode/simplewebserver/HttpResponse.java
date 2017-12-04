@@ -19,6 +19,7 @@ public class HttpResponse {
   public HttpResponse() {
     setHeader("Date", ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.RFC_1123_DATE_TIME));
     setHeader("Content-Length", Integer.toString(body.length));
+    setHeader("Server", "SimpleWebServer");
   }
 
   public void setResponseCode(HttpResponseCode responseCode) {

@@ -10,6 +10,7 @@ public class ContentType {
     mappings.put("html", "text/html");
     mappings.put("jpg", "image/jpeg");
     mappings.put("jpeg", "image/jpeg");
+    mappings.put("gif", "image/gif");
     mappings.put("json", "application/json");
   }
 
